@@ -16,7 +16,7 @@ setup(
         'sqlalchemy',
         'marshmallow',
         'werkzeug',
-        'requests'
+        'requests',
         'pyjwt'
     ]
 )
