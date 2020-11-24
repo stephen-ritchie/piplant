@@ -6,6 +6,7 @@
 
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/sticky-footer-navbar.css') }}" rel="stylesheet">
 
     <title>{% block title %}{% endblock %} - PiPlant</title>
 
@@ -18,14 +19,17 @@
     {% endblock %}
   </head>
   <body>
-    <h1>PiPlant</h1>
-    <a href="{{ url_for('home.landing') }}" class="btn btn-primary">Home</a>
-    <a href="{{ url_for('auth.logout') }}" class="btn btn-primary">Logout</a>
-    {% include 'flashed_messages.html' %}
-    <hr>
-    <div class="container">
-    {% block body %}
-    {% endblock %}
-    </div>
+    <main role="main">
+      <h1>PiPlant</h1>
+      <a href="{{ url_for('home.landing') }}" class="btn btn-primary">Home</a>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-primary">Logout</a>
+      {% include 'flashed_messages.html' %}
+      <hr>
+      <div class="container">
+      {% block body %}
+      {% endblock %}
+      </div>
+    </main>
+    {% include 'footer.html' %}
   </body>
 </html>

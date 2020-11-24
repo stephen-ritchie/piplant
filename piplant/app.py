@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from . import __version__
 
 
 def create_app(test_config=None):
@@ -11,6 +12,7 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'db.sqlite'),
     )
+    app.jinja_env.globals['BUILD_VERSION'] = __version__
 
     try:
         os.makedirs(app.instance_path)
