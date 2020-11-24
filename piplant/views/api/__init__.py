@@ -29,9 +29,9 @@ def forbidden(message=None, error=None):
     return Response(status=403)
 
 
-@api.route('/info', methods=['GET'])
+@api.route('/', methods=['GET'])
 def info():
-    return 'API Version: %s' % __version__
+    return make_response(jsonify({"version": __version__}), 200)
 
 
 @api.route('/whoami', methods=['GET'])
