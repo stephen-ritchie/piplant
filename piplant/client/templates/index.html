@@ -1,1 +1,20 @@
-PiPlant Client
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Client - PiPlant</title>
+  </head>
+  <body>
+    <div>
+      <h1>PiPlant Client</h1>
+      <a href="{{ url_for('debug') }}">Debug Menu</a>
+      <hr>
+      <pre>version: {{ version }}</pre>
+      <pre>server: {{ server }}</pre>
+      <pre>server: {{ token }}</pre>
+      <h2>URL Map</h2>
+      <pre>{{ routes }}</pre>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+SCHEMA_VALIDATION_FAILED = "Schema validation failed."
+ACCOUNT_WITH_EMAIL_ALREADY_EXISTS = "An account already exists with that email address."
+LOGIN_FAILED = "Please check your login details and try again."
+JWT_SIGNATURE_EXPIRED = "Signature expired. Please log in again."
+JWT_INVALID_TOKEN = "Invalid token. Please log in again."
+SUCCESS = "success"

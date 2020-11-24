@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Client - PiPlant</title>
+  </head>
+  <body>
+    <div>
+      <h1>PiPlant Client</h1>
+      <a href="{{ url_for('index') }}">Home</a>
+      <hr>
+      <h2>Discovered TP Link Smart Devices</h2>
+      {% for device in tp_link_devices %}
+      <pre>{{ device }}</pre>
+      {% endfor %}
+    </div>
+  </body>
+</html>

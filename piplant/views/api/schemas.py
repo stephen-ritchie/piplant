@@ -1,0 +1,44 @@
+from marshmallow import Schema, fields, validate
+
+
+class CreateUser(Schema):
+    name = fields.Str(required=True)
+    email = fields.Email(required=True)
+    password = fields.Str(required=True)
+    phone = fields.Str(required=False)
+
+
+class UpdateUser(Schema):
+    id = fields.Integer(required=False)
+    name = fields.Str(required=False)
+    email = fields.Email(required=False)
+    phone = fields.Str(required=False)
+
+
+class GetToken(Schema):
+    email = fields.Email(required=True)
+    password = fields.Str(required=True)
+
+
+class CreateDevice(Schema):
+    name = fields.Str(required=True)
+    type = fields.Str(required=True, validate=validate.OneOf(["device", "tp_link_smart_plug"]))
+    user_id = fields.Integer(required=False)
+    description = fields.Str()
+    ip_address = fields.Str()  # TODO: This should be required if type is tp link smart plug
+
+
+class UpdateDevice(Schema):
+    id = fields.Integer(required=False)
+    name = fields.Str()
+    type = fields.Str()
+    description = fields.Str()
+    ip_address = fields.Str()  # TODO: This should be required if type is tp link smart plug
+
+
+class CreateSchedule(Schema):
+    device_id = fields.Integer(required=True)
+    starts = fields.Str(required=True)
+    ends = fields.Str(required=True)
+    frequency = fields.Str(required=True, validate=validate.OneOf(['weekly', 'monthly']))
+    bitmask = fields.Integer(required=True)
