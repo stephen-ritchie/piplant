@@ -97,6 +97,21 @@ class TPLinkSmartPlug(Device):
         return info
 
 
+class DataPoint(db.Model):
+    id = Column(Integer, primary_key=True)
+    device_id = Column(Integer, nullable=False)
+    key = Column(Text, nullable=False)
+    value = Column(Text, nullable=False)
+
+    def __init__(self, device_id, key, value):
+        self.device_id = device_id
+        self.key = key
+        self.value = value
+
+    def get_info(self):
+        return {"id": self.id, "device_id": self.device_id, "key": self.key, "value": self.value}
+
+
 class Schedule(db.Model):
     id = Column(Integer, primary_key=True)
     device_id = Column(Integer)
