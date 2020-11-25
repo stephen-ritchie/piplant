@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # Scheduler for running background tasks
     if not args.disable_scheduler:
         scheduler = BackgroundScheduler(daemon=True)
-        scheduler.add_job(piplant.scheduler.Scheduler(app=app).update, "interval", seconds=5)
+        scheduler.add_job(piplant.scheduler.Scheduler(app=app).update, "interval", seconds=60)
         scheduler.start()
 
     app.run(host=args.host, port=args.port, debug=args.port, use_reloader=bool(args.disable_scheduler))
