@@ -1,9 +1,12 @@
+import logging
+
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, LoginManager
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import piplant.messages as messages
 from piplant.models import db, User
+import piplant.lib as lib
 
 
 auth = Blueprint('auth', __name__)
@@ -70,6 +73,7 @@ def register():
         email = request.form.get('email')
         name = request.form.get('name')
         password = request.form.get('password')
+        phone = request.form.get('phone', None)
 
         user = User.query.filter_by(email=email).first()
 
@@ -81,14 +85,12 @@ def register():
 
         # create new user with the form data. Hash the password so plaintext
         # version isn't saved. add the new user to the database
-        db.session.add(
-            User(
-                email=email,
-                name=name,
-                password=generate_password_hash(password, method='sha256')
-            )
-        )
-        db.session.commit()
+        try:
+            lib.create_user(name=name, email=email, password=password, phone=phone)
+        except Exception as err:
+            logging.error(str(err))
+            flash(messages.CREATE_USER_ERROR)
+            return redirect(url_for('auth.register'))
 
         return redirect(url_for('auth.login'))
 

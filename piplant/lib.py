@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 from werkzeug.security import generate_password_hash
 
-from .models import db, User, Device, TPLinkSmartPlug, Schedule
+from .models import db, User, Device, TPLinkSmartPlug, Schedule, DataPoint
 
 
 def get_url_root(url):
@@ -17,6 +17,11 @@ def create_user(name, email, password, phone):
     user = User.query.filter_by(email=email).first()
     if user:
         raise Exception("A user with email [%s] already exists." % email)
+
+    if not email:
+        raise Exception("Email address cannot be empty.")
+    if not password:
+        raise Exception("Password cannot be empty")
 
     db.session.add(
         User(
@@ -147,3 +152,10 @@ def get_tasks(user_id):
             tasks.append({"actions": actions, "info": device.get_info()})
 
     return tasks
+
+
+def create_data_point(device_id: int, key: str, value: str) -> DataPoint:
+    datapoint = DataPoint(device_id=device_id, key=key, value=value)
+    db.session.add(datapoint)
+    db.session.commit()
+    return datapoint
