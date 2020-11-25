@@ -48,7 +48,7 @@ def update_user(user_id, name=None, email=None, password=None, phone=None):
 
     # Make sure email address is not already in use
     # TODO: This logic doesn't work when passing in your own email address
-    if email is not None and User.query.filter_by(email=email).first():
+    if email is not None and User.query.filter_by(email=email).first() and email != user.email:
         raise Exception('Email address is already in use.')
 
     db.session.commit()

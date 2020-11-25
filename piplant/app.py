@@ -53,5 +53,8 @@ def register_blueprints(app):
     from .views.device import device
     app.register_blueprint(device)
 
+    from .views.user import user
+    app.register_blueprint(user)
+
     from .views.schedule import schedule
     app.register_blueprint(schedule, url_prefix='/schedules')
