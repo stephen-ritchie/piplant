@@ -3,6 +3,13 @@
 {% block title %}About{% endblock %}
 
 {% block body %}
+<script>
+  $( document ).ready(function() {
+    var device_id={{ device['id'] }};
+    var url = "../api/v1/charts/" + device_id;
+    getChartDataFromAPI(url);
+  });
+</script>
 <h2>{{ device.name }}</h2>
 <form method="post">
   {% for key, value in device.get_info().items() %}
@@ -31,6 +38,9 @@
   </li>
   {% endfor %}
 </ul>
+<hr>
+<h2>Charts</h2>
+<div id="charts"></div>
 <hr>
 <button type="button" class="btn btn-danger" onclick="deleteDevice( {{ device.id }} )">Delete Device</button>
 {% endblock %}

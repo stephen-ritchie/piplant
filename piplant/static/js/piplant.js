@@ -35,3 +35,31 @@ function deleteSchedule(scheduleId) {
         });
     }
 }
+
+function getChartDataFromAPI(url) {
+    $.ajax({
+        url: url,
+        type: "get",
+        data: {vals: ''},
+        success: function(response) {
+            JSON.stringify(response);
+            for (var prop in response) {
+                renderChart(response[prop].title, response[prop]);
+            }
+        },
+    });
+}
+
+function renderChart(title, chartData) {
+    var canvas = document.createElement('canvas');
+    canvas.id = title;
+    canvas.width = 1000;
+    canvas.height = 600;
+    
+    var body = document.getElementById("charts");
+    body.appendChild(canvas);
+
+    var ctx = document.getElementById(title).getContext("2d");
+
+    var chart = new Chart(ctx, chartData);
+}

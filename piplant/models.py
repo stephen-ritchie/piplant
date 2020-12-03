@@ -102,14 +102,16 @@ class DataPoint(db.Model):
     device_id = Column(Integer, nullable=False)
     key = Column(Text, nullable=False)
     value = Column(Text, nullable=False)
+    timestamp = Column(Text)
 
-    def __init__(self, device_id, key, value):
+    def __init__(self, device_id, key, value, timestamp):
         self.device_id = device_id
         self.key = key
         self.value = value
+        self.timestamp = timestamp
 
     def get_info(self):
-        return {"id": self.id, "device_id": self.device_id, "key": self.key, "value": self.value}
+        return {"id": self.id, "device_id": self.device_id, "key": self.key, "value": self.value, 'timestamp': self.timestamp}
 
 
 class Schedule(db.Model):

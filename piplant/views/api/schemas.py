@@ -42,3 +42,11 @@ class CreateSchedule(Schema):
     ends = fields.Str(required=True)
     frequency = fields.Str(required=True, validate=validate.OneOf(['weekly', 'monthly']))
     bitmask = fields.Integer(required=True)
+
+
+class DataPoint(Schema):
+    id = fields.Integer()
+    device_id = fields.Integer()
+    key = fields.Str()
+    value = fields.Str()
+    timestamp = fields.DateTime()

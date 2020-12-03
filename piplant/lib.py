@@ -1,5 +1,6 @@
 import calendar
 from datetime import datetime
+from typing import List
 from urllib.parse import urlparse
 
 from werkzeug.security import generate_password_hash
@@ -154,8 +155,12 @@ def get_tasks(user_id):
     return tasks
 
 
-def create_data_point(device_id: int, key: str, value: str) -> DataPoint:
-    datapoint = DataPoint(device_id=device_id, key=key, value=value)
+def create_data_point(device_id: int, key: str, value: str, timestamp: str) -> DataPoint:
+    datapoint = DataPoint(device_id=device_id, key=key, value=value, timestamp=timestamp)
     db.session.add(datapoint)
     db.session.commit()
     return datapoint
+
+
+def get_all_data_points(device_id: int) -> List:
+    return [record for record in db.session.query(DataPoint).filter(DataPoint.device_id == device_id).all()]

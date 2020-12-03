@@ -7,6 +7,7 @@ from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash
 
 from . import schemas
+from piplant.models import db, User, Device, TPLinkSmartPlug, Schedule, DataPoint
 from piplant.models import User
 import piplant.lib as lib
 import piplant.messages as messages
@@ -258,3 +259,68 @@ def get_tasks():
     except Exception as err:
         logging.error(str(err))
         return bad_request('Could not get tasks for user with id %s' % user_id, err)
+
+
+@api.route('/datapoints', methods=['POST'])
+def create_data_point():
+    errors = schemas.DataPoint().validate(request.form)
+    if errors:
+        return bad_request(messages.SCHEMA_VALIDATION_FAILED, str(errors))
+
+    device_id = request.form.get("device_id")
+    key = request.form.get("key")
+    value = request.form.get("value")
+    timestamp = request.form.get("timestamp")
+    try:
+        datapoint = lib.create_data_point(device_id=device_id, key=key, value=value, timestamp=timestamp)
+        return make_response(jsonify(datapoint.get_info()), 201)
+    except Exception as err:
+        logging.error(str(err))
+        return bad_request('Could not create data point.', err)
+
+
+# TODO: READ datapoint
+
+
+# TODO: Update datapoint
+
+
+# TODO: Delete datapoint
+
+
+@api.route('/charts/<int:device_id>', methods=['GET'])
+@login_required
+def get_charts(device_id):
+    # TODO: Make sure the current user is allowed to see the requested device.
+
+    # Get the unique keys for the device
+    distinct_keys = []
+    for value in db.session.query(DataPoint.key).filter(DataPoint.device_id == device_id).distinct():
+        distinct_keys.append(value)
+
+    charts = []
+    for key in distinct_keys:
+        chart = {'type': 'line'}
+        chart.update({'options': {}})
+        chart.update({'title': key[0]})
+        dataset_label = key[0]
+
+        labels = []
+        data = []
+        for record in db.session.query(DataPoint).filter(DataPoint.device_id == device_id).filter(DataPoint.key == key[0]):
+            labels.append(record.timestamp)
+            data.append(record.value)
+
+        chart.update({'data': {
+            'labels': labels,
+            'datasets': [{
+                'label': dataset_label,
+                'backgroundColor': 'rgb(80, 89, 120)',
+                'borderColor': 'rgb(80, 89, 120)',
+                'data': data
+            }]
+        }})
+
+        charts.append(chart)
+
+    return make_response(jsonify(charts), 200)
