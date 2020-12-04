@@ -13,7 +13,7 @@
 <h2>{{ device.name }}</h2>
 <form method="post">
   {% for key, value in device.get_info().items() %}
-  {% if key != "user_id" and key != "type" and key != "id" %}
+  {% if key != "user_id" and key != "type" and key != "id" and key != "data" %}
   <div class="form-group">
     <label for="{{ key }}">{{ key }}</label>
     <input type="text" name="{{ key }}" class="form-control" id="{{ key }}" value="{{ value }}">
