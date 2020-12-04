@@ -24,6 +24,9 @@ class Client:
         self.token = token
         self.api_version = api_version
 
+        os.system('modprobe w1-gpio')
+        os.system('modprobe w1-therm')
+
     def run(self, host, port, debug):
         # Set the version as a jinja global so all templates can see it
         self.app.jinja_env.globals['BUILD_VERSION'] = __version__
@@ -38,7 +41,9 @@ class Client:
 
     def process_request(self):
         # TODO: schema validation of incoming request
-        self.app.logger.info("Received %s new request(s) from %s" % (len(request.get_json()), request.remote_addr))
+
+        self.app.logger.debug("Received %s new request(s) from %s" % (len(request.get_json()), request.remote_addr))
+
         for item in request.get_json():
             device_id = item['info']['id']
             for action in item['actions']:
@@ -69,7 +74,11 @@ class Client:
     def _process_temperature_probe(self, device_id, serial_number, action):
         temperature_probe = TemperatureProbe(serial_number)
         if action == "status":
-            self._send_data(device_id, payload={"temperature": temperature_probe.current_temperature})
+            try:
+                current_temperature = temperature_probe.current_temperature
+                self._send_data(device_id, payload={"temperature": current_temperature})
+            except Exception as err:
+                self.app.logger.error("Could not get current temperature for serial number %s. %s" % (serial_number, str(err)))
         else:
             self.app.logger.error('Unknown action for DS18B20: %s' % action)
 
@@ -161,7 +170,6 @@ if __name__ == "__main__":
     try:
         auth_url = urlparse("{}/api/{}/token".format(args.server, args.api_version)).geturl()
         auth_token = Client.get_token(url=auth_url, email=args.username, password=args.password)
-        app.logger.debug("Auth token is %s" % auth_token)  # TODO: Should this be logged?
 
         client = Client(_app=app, server=args.server, token=auth_token, api_version=args.api_version)
         client.run(host=args.host, port=args.port, debug=args.debug)
