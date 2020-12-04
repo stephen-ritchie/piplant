@@ -10,11 +10,15 @@
       <h1>PiPlant Client</h1>
       <a href="{{ url_for('debug') }}">Debug Menu</a>
       <hr>
-      <pre>version: {{ version }}</pre>
       <pre>server: {{ server }}</pre>
-      <pre>server: {{ token }}</pre>
+      <pre>token: {{ token }}</pre>
+      <pre>api version: {{ api_version }}</pre>
       <h2>URL Map</h2>
       <pre>{{ routes }}</pre>
     </div>
+    <hr>
+    <footer>
+      <pre>version: {{ BUILD_VERSION }}</pre>
+    </footer>
   </body>
 </html>
