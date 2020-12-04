@@ -4,7 +4,7 @@ import jwt
 from flask import current_app
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, Text
+from sqlalchemy import Column, Integer, Text, Boolean
 
 from . import messages
 
@@ -13,16 +13,18 @@ db = SQLAlchemy()
 
 class User(UserMixin, db.Model):
     id = Column(Integer, primary_key=True)
-    name = Column(Text)
-    email = Column(Text, unique=True)
-    phone = Column(Text)
-    password = Column(Text)
+    name = Column(Text, nullable=False)
+    email = Column(Text, unique=True, nullable=False)
+    phone = Column(Text, nullable=True)
+    password = Column(Text, nullable=False)
+    admin = Column(Boolean, nullable=False)
 
-    def __init__(self, name, email, password, phone=None):
+    def __init__(self, name, email, password, phone=None, admin=False):
         self.name = name
         self.email = email
         self.password = password
         self.phone = phone
+        self.admin = admin
 
     @staticmethod
     def encode_auth_token(user_id):
@@ -76,6 +78,10 @@ class Device(db.Model):
     def is_tp_link_smart_plug(self):
         return self.type == "tp_link_smart_plug"
 
+    @property
+    def is_temperature_probe(self):
+        return self.type == "ds18b20"
+
     def get_data_points(self):
         return [record.get_info() for record in db.session.query(DataPoint).filter(DataPoint.device_id == self.id).all()]
 
@@ -100,6 +106,26 @@ class TPLinkSmartPlug(Device):
     def get_info(self):
         info = super().get_info()
         info['ip_address'] = self.ip_address
+        return info
+
+
+class DS18B20(Device):
+    serial_number = Column(Text, nullable=False)
+    pin = Column(Integer, nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'ds18b20',
+    }
+
+    def __init__(self, name, user_id, serial_number, description):
+        super().__init__(name=name, type="ds18b20", user_id=user_id, description=description)
+        self.serial_number = serial_number
+        self.pin = 4
+
+    def get_info(self):
+        info = super().get_info()
+        info['serial_number'] = self.serial_number
+        info['pin'] = self.pin
         return info
 
 

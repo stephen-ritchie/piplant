@@ -22,18 +22,22 @@ class GetToken(Schema):
 
 class CreateDevice(Schema):
     name = fields.Str(required=True)
-    type = fields.Str(required=True, validate=validate.OneOf(["device", "tp_link_smart_plug"]))
+    type = fields.Str(required=True, validate=validate.OneOf(["device", "tp_link_smart_plug", "ds18b20"]))
     user_id = fields.Integer(required=False)
     description = fields.Str()
     ip_address = fields.Str()  # TODO: This should be required if type is tp link smart plug
+    serial_number = fields.Str()  # TODO: Required only for temperature probe
+    pin = fields.Integer()
 
 
 class UpdateDevice(Schema):
     id = fields.Integer(required=False)
     name = fields.Str()
-    type = fields.Str()
+    type = fields.Str(validate=validate.OneOf(["device", "tp_link_smart_plug", "ds18b20"]))
     description = fields.Str()
     ip_address = fields.Str()  # TODO: This should be required if type is tp link smart plug
+    serial_number = fields.Str()
+    pin = fields.Integer()
 
 
 class CreateSchedule(Schema):

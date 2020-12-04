@@ -160,9 +160,11 @@ def create_device():
     device_type = request.form.get('type')
     user_id = current_user.id if request.form.get('user_id') is None else request.form.get('user_id')
     description = request.form.get('description')
+    ip_address = request.form.get('ip_address') or None
+    serial_number = request.form.get('serial_number') or None
 
     try:
-        device = lib.create_device(name=name, type=device_type, user_id=user_id, description=description)
+        device = lib.create_device(name=name, type=device_type, user_id=user_id, description=description, ip_address=ip_address, serial_number=serial_number)
         return make_response(jsonify(device.get_info()), 201)
     except Exception as err:
         logging.error(str(err))

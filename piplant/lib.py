@@ -5,7 +5,8 @@ from urllib.parse import urlparse
 
 from werkzeug.security import generate_password_hash
 
-from .models import db, User, Device, TPLinkSmartPlug, Schedule, DataPoint
+from . import messages
+from .models import db, User, Device, TPLinkSmartPlug, Schedule, DataPoint, DS18B20
 
 
 def get_url_root(url):
@@ -17,12 +18,12 @@ def get_url_root(url):
 def create_user(name, email, password, phone):
     user = User.query.filter_by(email=email).first()
     if user:
-        raise Exception("A user with email [%s] already exists." % email)
+        raise Exception(messages.ACCOUNT_WITH_EMAIL_ALREADY_EXISTS)
 
     if not email:
-        raise Exception("Email address cannot be empty.")
+        raise Exception(messages.EMAIL_CANNOT_BE_EMPTY)
     if not password:
-        raise Exception("Password cannot be empty")
+        raise Exception(messages.PASSWORD_CANNOT_BE_EMPTY)
 
     db.session.add(
         User(
@@ -55,7 +56,7 @@ def update_user(user_id, name=None, email=None, password=None, phone=None):
     # Make sure email address is not already in use
     # TODO: This logic doesn't work when passing in your own email address
     if email is not None and User.query.filter_by(email=email).first() and email != user.email:
-        raise Exception('Email address is already in use.')
+        raise Exception(messages.ACCOUNT_WITH_EMAIL_ALREADY_EXISTS)
 
     db.session.commit()
 
@@ -71,9 +72,11 @@ def delete_user(user_id):
     db.session.commit()
 
 
-def create_device(name, type, user_id, description, ip_address=None):
+def create_device(name, type, user_id, description, ip_address=None, serial_number=None):
     if type == "tp_link_smart_plug":
         device = TPLinkSmartPlug(name=name, user_id=user_id, ip_address=ip_address, description=description)
+    elif type == "ds18b20":
+        device = DS18B20(name=name, user_id=user_id, serial_number=serial_number, description=description)
     else:
         device = Device(name=name, type=type, user_id=user_id, description=description)
 
@@ -90,13 +93,16 @@ def get_devices(user_id):
     return [device for device in db.session.query(Device).filter(Device.user_id == user_id).all()]
 
 
-def update_device(device_id, name=None, type=None, description=None, ip_address=None):
+def update_device(device_id, name=None, type=None, description=None, ip_address=None, serial_number=None):
     device = get_device(device_id)
     device.name = device.name if name is None else name
     device.type = device.type if type is None else type
     device.description = device.description if description is None else description
+
     if device.is_tp_link_smart_plug:
         device.ip_address = device.ip_address if ip_address is None else ip_address
+    elif device.is_temperature_probe:
+        device.serial_number = device.serial_number if serial_number is None else serial_number
 
     db.session.commit()
 
@@ -147,7 +153,7 @@ def delete_schedule(schedule_id):
 def get_tasks(user_id):
     tasks = []
     for device in get_devices(user_id):
-        if device.type == "tp_link_smart_plug":
+        if device.type == "tp_link_smart_plug" or device.type == "ds18b20":
             tasks.append({"actions": list(["status"]), "info": device.get_info()})
 
         actions = []
