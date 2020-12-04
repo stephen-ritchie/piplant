@@ -76,6 +76,12 @@ class Device(db.Model):
     def is_tp_link_smart_plug(self):
         return self.type == "tp_link_smart_plug"
 
+    def get_data_points(self):
+        return [record.get_info() for record in db.session.query(DataPoint).filter(DataPoint.device_id == self.id).all()]
+
+    def get_all_info(self):
+        return {"id": self.id, "name": self.name, "type": self.type, "user_id": self.user_id, "description": self.description, 'data': self.get_data_points()}
+
     def get_info(self):
         return {"id": self.id, "name": self.name, "type": self.type, "user_id": self.user_id, "description": self.description}
 
