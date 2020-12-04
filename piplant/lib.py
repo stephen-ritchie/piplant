@@ -63,6 +63,9 @@ def update_user(user_id, name=None, email=None, password=None, phone=None):
 
 
 def delete_user(user_id):
+    for device in get_devices(user_id):
+        delete_device(device.id)
+
     user = get_user(user_id)
     db.session.delete(user)
     db.session.commit()
@@ -101,6 +104,12 @@ def update_device(device_id, name=None, type=None, description=None, ip_address=
 
 
 def delete_device(device_id):
+    for schedule in db.session.query(Schedule).filter(Schedule.device_id == device_id).all():
+        delete_schedule(schedule.id)
+
+    for data_point in get_all_data_points_by_device_id(device_id):
+        delete_data_point(data_point.id)
+
     device = get_device(device_id)
     db.session.delete(device)
     db.session.commit()
@@ -138,6 +147,9 @@ def delete_schedule(schedule_id):
 def get_tasks(user_id):
     tasks = []
     for device in get_devices(user_id):
+        if device.type == "tp_link_smart_plug":
+            tasks.append({"actions": list(["status"]), "info": device.get_info()})
+
         actions = []
         for schedule in get_schedules_by_device(device.id):
             date_format = "%Y-%m-%d %H:%M:%S"
@@ -162,5 +174,18 @@ def create_data_point(device_id: int, key: str, value: str, timestamp: str) -> D
     return datapoint
 
 
-def get_all_data_points(device_id: int) -> List:
-    return [record for record in db.session.query(DataPoint).filter(DataPoint.device_id == device_id).all()]
+def get_data_point(data_point_id: int) -> DataPoint:
+    return DataPoint.query.filter_by(id=data_point_id).first()
+
+
+def get_all_data_points_by_device_id(device_id: int) -> List[DataPoint]:
+    return [data_point for data_point in db.session.query(DataPoint).filter(DataPoint.device_id == device_id).all()]
+
+
+# TODO: Should a data point be allowed to be updated?
+
+
+def delete_data_point(data_point_id: int) -> None:
+    data_point = get_data_point(data_point_id)
+    db.session.delete(data_point)
+    db.session.commit()

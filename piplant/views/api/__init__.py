@@ -173,7 +173,7 @@ def create_device():
 def get_device(device_id):
     try:
         device = lib.get_device(device_id)
-        return make_response(jsonify(device.get_info()), 200)
+        return make_response(jsonify(device.get_all_info()), 200)
     except Exception as err:
         logging.error(str(err))
         return bad_request('Could not get device with id %s' % device_id)
@@ -250,9 +250,8 @@ def delete_schedule(schedule_id):
 # TODO: Create task? Is this a use case?
 
 
-@api.route('/tasks', methods=['GET'])
-def get_tasks():
-    user_id = request.form.get("user_id")
+@api.route('/tasks/<int:user_id>', methods=['GET'])
+def get_tasks(user_id):
     try:
         tasks = lib.get_tasks(user_id)
         return make_response(jsonify(tasks), 200)
@@ -279,7 +278,14 @@ def create_data_point():
         return bad_request('Could not create data point.', err)
 
 
-# TODO: READ datapoint
+@api.route('/datapoints/<int:data_point_id>', methods=['GET'])
+def get_data_point(data_point_id):
+    try:
+        data_point = lib.get_data_point(data_point_id)
+        return make_response(jsonify(data_point.get_info()), 200)
+    except Exception as err:
+        logging.error(str(err))
+        return bad_request('Could not get data point with id %s' % data_point_id, err)
 
 
 # TODO: Update datapoint
@@ -291,13 +297,18 @@ def create_data_point():
 @api.route('/charts/<int:device_id>', methods=['GET'])
 @login_required
 def get_charts(device_id):
-    # TODO: Make sure the current user is allowed to see the requested device.
+    # Only allow a user to see their own devices
+    # TODO: Should someone be able to phish out device IDs by looking for 403s?
+    device = lib.get_device(device_id)
+    if device is None or device.user_id != current_user.id:
+        return forbidden()
 
     # Get the unique keys for the device
     distinct_keys = []
     for value in db.session.query(DataPoint.key).filter(DataPoint.device_id == device_id).distinct():
         distinct_keys.append(value)
 
+    # Create a Chart.js chart for each key type
     charts = []
     for key in distinct_keys:
         chart = {'type': 'line'}
@@ -324,3 +335,12 @@ def get_charts(device_id):
         charts.append(chart)
 
     return make_response(jsonify(charts), 200)
+
+
+@api.route('/requests', methods=['POST'])
+def process_request():
+    device_id = request.get_json()['device_id']
+    for key, value in request.get_json()['payload'].items():
+        lib.create_data_point(device_id, key, value, datetime.datetime.now().isoformat())
+
+    return Response(status=200)
