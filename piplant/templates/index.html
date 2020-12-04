@@ -5,19 +5,19 @@
 {% block body %}
 <h2>Devices</h2>
 <div>
-  <a href="{{ url_for('device.add') }}" class="btn btn-sm btn-secondary">Add Device</a>
+  <a href="{{ url_for('device.add') }}" class="btn btn-sm btn-success">Add Device</a>
 </div>
 <br>
 <div class="list-group">
   {% for device in devices %}
-  <a href="{{ url_for('device.info', device_id=device['id']) }}" class="list-group-item list-group-item-action list-group-item-primary">{{ device['name'] }}</a>
+  <a href="{{ url_for('device.info', device_id=device['id']) }}" class="list-group-item list-group-item-action">{{ device['name'] }}</a>
   {% endfor %}
 </div>
 <hr>
 <h2>Users</h2>
 <div class="list-group">
   {% for user in users %}
-  <a href="{{ url_for('user.about') }}" class="list-group-item list-group-item-action list-group-item-primary">{{ user['name'] }}</a>
+  <a href="{{ url_for('user.about') }}" class="list-group-item list-group-item-action">{{ user['name'] }}</a>
   {% endfor %}
 </div>
 {% endblock %}

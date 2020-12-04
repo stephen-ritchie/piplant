@@ -24,7 +24,6 @@
       <h1>PiPlant</h1>
       <a href="{{ url_for('home.landing') }}" class="btn btn-primary">Home</a>
       <a href="{{ url_for('auth.logout') }}" class="btn btn-primary">Logout</a>
-      {% include 'flashed_messages.html' %}
       <hr>
       <div class="container">
       {% block body %}
