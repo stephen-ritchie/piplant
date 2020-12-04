@@ -13,9 +13,9 @@ import piplant.scheduler
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script for running PiPlant server")
-    parser.add_argument("-host", default="0.0.0.0", help="(default: %(default)s)")
-    parser.add_argument("-port", default=5000, help="(default: %(default)s)")
-    parser.add_argument("-debug", action="store_true")
+    parser.add_argument("--host", default="0.0.0.0", help="(default: %(default)s)")
+    parser.add_argument("--port", default=5000, help="(default: %(default)s)")
+    parser.add_argument("--debug", action="store_true")
     parser.add_argument("--disable-scheduler", action="store_true", help="Disable the scheduler from running")
     args = parser.parse_args()
 
@@ -31,4 +31,4 @@ if __name__ == "__main__":
         scheduler.add_job(piplant.scheduler.Scheduler(app=app).update, "interval", seconds=60)
         scheduler.start()
 
-    app.run(host=args.host, port=args.port, debug=args.port, use_reloader=bool(args.disable_scheduler))
+    app.run(host=args.host, port=args.port, debug=args.debug, use_reloader=bool(args.disable_scheduler))
