@@ -1,3 +1,4 @@
+import logging
 import os
 
 from flask import Flask
@@ -25,6 +26,9 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     with app.app_context():
+        # Configure the logger
+        configure_logger(app)
+
         # Init the database
         from piplant.models import db
         db.init_app(app)
@@ -34,9 +38,17 @@ def create_app(test_config=None):
         from .auth import login_manager
         login_manager.init_app(app)
 
+        # Register the blueprints
         register_blueprints(app)
 
         return app
+
+
+def configure_logger(app):
+    file_handler = logging.FileHandler(os.path.join(app.instance_path, "server.log"))
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+    app.logger.addHandler(file_handler)
 
 
 def register_blueprints(app):
