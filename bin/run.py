@@ -25,10 +25,16 @@ if __name__ == "__main__":
 
     app = create_app()
 
+    use_reloader = args.debug
+
     # Scheduler for running background tasks
     if not args.disable_scheduler:
         scheduler = BackgroundScheduler(daemon=True)
         scheduler.add_job(piplant.scheduler.Scheduler(app=app).update, "interval", seconds=10)
         scheduler.start()
 
-    app.run(host=args.host, port=args.port, debug=args.debug, use_reloader=bool(args.disable_scheduler))
+        if args.debug:
+            app.logger.warning("Reloader will not be enabled since the Scheduler is active.")
+        use_reloader = False
+
+    app.run(host=args.host, port=args.port, debug=args.debug, use_reloader=use_reloader)
