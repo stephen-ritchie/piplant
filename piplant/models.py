@@ -82,6 +82,9 @@ class Device(db.Model):
     def is_temperature_probe(self):
         return self.type == "ds18b20"
 
+    def can_have_schedule(self):
+        return self.type == "tp_link_smart_plug"
+
     def get_data_points(self):
         return [record.get_info() for record in db.session.query(DataPoint).filter(DataPoint.device_id == self.id).all()]
 
@@ -110,8 +113,8 @@ class TPLinkSmartPlug(Device):
 
 
 class DS18B20(Device):
-    serial_number = Column(Text, nullable=False)
-    pin = Column(Integer, nullable=False)
+    serial_number = Column(Text)
+    pin = Column(Integer)
 
     __mapper_args__ = {
         'polymorphic_identity': 'ds18b20',
