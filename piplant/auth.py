@@ -2,11 +2,11 @@ import logging
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, LoginManager
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 
-import piplant.messages as messages
-from piplant.models import db, User
 import piplant.lib as lib
+import piplant.messages as messages
+from piplant.models import User
 
 
 auth = Blueprint('auth', __name__)
@@ -15,8 +15,14 @@ login_manager.login_view = 'auth.login'
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+def load_user(user_id: int) -> User:
+    return lib.get_user(user_id)
+
+
+@login_manager.unauthorized_handler
+def unauthorized_callback():
+    # TODO: See if there's a way to return 401 if not in the browser. Maybe put a Location header?
+    return redirect(url_for('auth.login'))
 
 
 @login_manager.request_loader
@@ -44,6 +50,8 @@ def load_user_from_request(web_request):
 @auth.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
+        # TODO: Schema validation
+
         email = request.form.get('email')
         password = request.form.get('password')
         # remember = True if request.form.get('remember') else False
@@ -57,7 +65,7 @@ def login():
         if not user or not check_password_hash(user.password, password):
             flash(messages.LOGIN_FAILED)
             # if user doesn't exist or password is wrong, reload the page
-            return redirect(url_for('auth.login'))
+            return render_template('auth/login.html'), 401
 
         # if the above check passes, then we know the user has the right
         # credentials
@@ -70,6 +78,8 @@ def login():
 @auth.route('/register', methods=['POST', 'GET'])
 def register():
     if request.method == 'POST':
+        # TODO: Schema validation
+
         email = request.form.get('email')
         name = request.form.get('name')
         password = request.form.get('password')
@@ -83,8 +93,7 @@ def register():
             flash(messages.ACCOUNT_WITH_EMAIL_ALREADY_EXISTS)
             return redirect(url_for('auth.register'))
 
-        # create new user with the form data. Hash the password so plaintext
-        # version isn't saved. add the new user to the database
+        # create new user with the form data.
         try:
             lib.create_user(name=name, email=email, password=password, phone=phone)
         except Exception as err:
