@@ -1,15 +1,20 @@
 from marshmallow import Schema, fields, validate
 
 
-class CreateUser(Schema):
+class User(Schema):
+    name = fields.Str()
+    email = fields.Email()
+    password = fields.Str()
+    phone = fields.Str()
+
+
+class CreateUser(User):
     name = fields.Str(required=True)
     email = fields.Email(required=True)
     password = fields.Str(required=True)
-    phone = fields.Str(required=False)
 
 
-class UpdateUser(Schema):
-    id = fields.Integer(required=False)
+class UpdateUser(User):
     name = fields.Str(required=False)
     email = fields.Email(required=False)
     phone = fields.Str(required=False)
@@ -19,9 +24,16 @@ class GetToken(Schema):
     email = fields.Email(required=True)
     password = fields.Str(required=True)
 
+# =========================================
 
-class CreateDevice(Schema):
+class Device(Schema):
     name = fields.Str(required=True)
+    type = fields.Str(validate=validate.OneOf(["device", "tp_link_smart_plug", "ds18b20"]))
+    description = fields.Str(required=False)
+
+
+class CreateDevice(Device):
+
     type = fields.Str(required=True, validate=validate.OneOf(["device", "tp_link_smart_plug", "ds18b20"]))
     user_id = fields.Integer(required=False)
     description = fields.Str()

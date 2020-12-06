@@ -26,6 +26,9 @@ class User(UserMixin, db.Model):
         self.phone = phone
         self.admin = admin
 
+    def is_admin(self) -> bool:
+        return bool(self.admin)
+
     @staticmethod
     def encode_auth_token(user_id):
         try:

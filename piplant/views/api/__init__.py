@@ -32,7 +32,7 @@ def forbidden(message=None, error=None):
 
 @api.route('/', methods=['GET'])
 def info():
-    return make_response(jsonify({"version": __version__}), 200)
+    return make_response(jsonify({"version": str(__version__)}), 200)
 
 
 @api.route('/whoami', methods=['GET'])
@@ -72,7 +72,12 @@ def get_token():
 
 
 @api.route('/users', methods=['POST'])
+@login_required
 def create_user():
+    # Only admins can create new users
+    if not current_user.is_admin():
+        return forbidden()
+
     errors = schemas.CreateUser().validate(request.form)
     if errors:
         return bad_request(str(errors))
@@ -96,6 +101,7 @@ def create_user():
 @api.route('/users/<int:user_id>', methods=['GET'])
 @login_required
 def get_user(user_id):
+    # TODO: Allow admins to get all users.
     if current_user.id != user_id:
         return forbidden()
 
@@ -108,12 +114,15 @@ def get_user(user_id):
 
 
 @api.route('/users', methods=['GET'])
+@login_required
 def get_all_users():
     return 'GET ALL USERS'
 
 
 @api.route('/users/<int:user_id>', methods=['PUT'])
+@login_required
 def update_user(user_id):
+    # TODO: Allow admins to update all users.
     if current_user.id != user_id:
         return forbidden()
 
@@ -121,9 +130,9 @@ def update_user(user_id):
     if errors:
         return bad_request(str(errors))
 
-    name = request.form.get('name')
-    email = request.form.get('email')
-    phone = request.form.get('phone')
+    name = request.form.get('name') or None
+    email = request.form.get('email') or None
+    phone = request.form.get('phone') or None
 
     try:
         lib.update_user(user_id, name=name, email=email, phone=phone)
@@ -134,7 +143,9 @@ def update_user(user_id):
 
 
 @api.route('/users/<int:user_id>', methods=['DELETE'])
+@login_required
 def delete_user(user_id):
+    # TODO: Allow admins to deleted any user.
     if current_user.id != user_id:
         return forbidden()
 
@@ -151,6 +162,7 @@ def delete_user(user_id):
 
 
 @api.route('/devices', methods=['POST'])
+@login_required
 def create_device():
     errors = schemas.CreateDevice().validate(request.form)
     if errors:
@@ -183,7 +195,12 @@ def get_device(device_id):
 
 @api.route('/devices', methods=['GET'])
 def get_all_devices():
-    return 'GET ALL DEVICES'
+    try:
+        devices = lib.get_devices(current_user.id)
+        return make_response(jsonify([device.get_info() for device in devices]), 200)
+    except Exception as err:
+        logging.error(str(err))
+        return bad_request("Could not get devices")
 
 
 @api.route('/devices/<int:device_id>', methods=['PUT'])

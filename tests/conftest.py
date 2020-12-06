@@ -59,5 +59,9 @@ def auth(client):
     return AuthActions(client)
 
 
+@pytest.fixture
+def api_url():
+    return "/api/v1"
+
 
 
