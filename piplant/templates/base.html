@@ -25,6 +25,7 @@
     {% endblock %}
     <main role="main" class="container">
       <div class="container">
+      {% include 'flashed_messages.html' %}
       {% block body %}
       {% endblock %}
       </div>

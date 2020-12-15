@@ -17,7 +17,7 @@
 <h2>Users</h2>
 <div class="list-group">
   {% for user in users %}
-  <a href="{{ url_for('user.about') }}" class="list-group-item list-group-item-action">{{ user['name'] }}</a>
+  <a href="{{ url_for('user.about', user_id=user.id) }}" class="list-group-item list-group-item-action">{{ user['name'] }}{% if user.is_admin() == True %}: (admin){% endif %}</a>
   {% endfor %}
 </div>
 {% endblock %}
