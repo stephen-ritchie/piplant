@@ -4,6 +4,7 @@ from typing import List
 from urllib.parse import urlparse
 
 from werkzeug.security import generate_password_hash
+from flask_login import current_user
 
 from . import messages
 from .models import db, User, Device, TPLinkSmartPlug, Schedule, DataPoint, DS18B20
@@ -43,8 +44,13 @@ def get_user(user_id):
 
 
 def get_users():
-    # TODO: Restrict users that can be seen by role
-    return [user for user in User.query.filter_by().all()]
+    users = []
+    if current_user.admin:
+        users = [user for user in User.query.filter_by().all()]
+    else:
+        users.append(get_user(current_user.id))
+
+    return users
 
 
 def update_user(user_id, name=None, email=None, password=None, phone=None):
